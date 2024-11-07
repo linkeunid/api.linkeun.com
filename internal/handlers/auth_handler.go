@@ -98,6 +98,17 @@ func (h *AuthHandler) SignIn(w http.ResponseWriter, r *http.Request) {
 
 	ctx := r.Context()
 	signData, err := h.service.SignIn(ctx, &signReq)
+
+	if signData == nil {
+		utils.WriteJSONResponse(w, &utils.ResponseOpts{
+			Code:    http.StatusUnprocessableEntity,
+			Data:    nil,
+			Error:   true,
+			Message: err.Error(),
+		})
+		return
+	}
+
 	if err != nil {
 		utils.WriteJSONResponse(w, &utils.ResponseOpts{
 			Code:    http.StatusInternalServerError,

@@ -23,6 +23,8 @@ spec:
               cpu: "500m"
               memory: "128Mi"
           env:
+            - name: HOST
+              value: "0.0.0.0"
             - name: DSN
               value: "root:root@tcp(mariadb:6603)/linkeun?charset=utf8&parseTime=True&loc=Local"
             - name: SENTRY_DSN
@@ -37,9 +39,11 @@ metadata:
   name: api-linkeun-com
 spec:
   selector:
-    app: api-linkeun-com
+    app: api-linkeun-com # This matches the labels of the NGINX pods
+  externalIPs:
+    - 192.168.49.2 # << minikube ip. In prod, replace with your IP Public
   ports:
     - protocol: TCP
-      name: http-port
-      port: 4444
-      targetPort: 4444
+      port: 4444 # Exposing port 80 on the service
+      targetPort: 4444 # The port the NGINX container is listening on
+  type: LoadBalancer # This type automatically provisions an external load balancer

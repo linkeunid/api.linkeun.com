@@ -22,7 +22,7 @@ func (app *App) setupRoutes(r chi.Router) {
 
 	r.Route("/v1", func(v1 chi.Router) {
 		v1.Route("/auth", func(authRouter chi.Router) {
-			authService := service.NewAuthService(userRepo, hub)
+			authService := service.NewAuthService(userRepo, hub, app.bcrypt)
 			authHandler := handlers.NewAuthHandler(authService, app.logger)
 			authHandler.RegisterRoutesV1(authRouter)
 		})

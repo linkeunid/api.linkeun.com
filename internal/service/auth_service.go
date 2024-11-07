@@ -9,18 +9,21 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/linkeunid/api.linkeun.com/internal/models"
 	"github.com/linkeunid/api.linkeun.com/internal/repository"
+	"github.com/linkeunid/api.linkeun.com/pkg/bcrypt"
 	"github.com/linkeunid/api.linkeun.com/pkg/env"
 )
 
 type AuthService struct {
 	repo      repository.UserRepository
 	sentryHub *sentry.Hub
+	hash      *bcrypt.Bcrypt
 }
 
-func NewAuthService(repo repository.UserRepository, sentryHub *sentry.Hub) *AuthService {
+func NewAuthService(repo repository.UserRepository, sentryHub *sentry.Hub, hash *bcrypt.Bcrypt) *AuthService {
 	return &AuthService{
 		repo:      repo,
 		sentryHub: sentryHub,
+		hash:      hash,
 	}
 }
 
@@ -49,6 +52,11 @@ func (s AuthService) SignIn(ctx context.Context, user *models.SignInRequest) (*m
 
 	if userFound == nil {
 		return nil, errors.New("user not found")
+	}
+
+	err = s.hash.ComparePassword(user.Password, userFound.Password)
+	if err != nil {
+		return nil, errors.New("email or password is incorrect")
 	}
 
 	expTime, err := time.ParseDuration(env.GetString("JWT_EXPIRES", "1") + "h")
