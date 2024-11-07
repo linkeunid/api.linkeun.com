@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 
 	"github.com/getsentry/sentry-go"
 	"github.com/linkeunid/api.linkeun.com/internal/models"
@@ -11,12 +12,14 @@ import (
 )
 
 type UserService struct {
+	logger    *slog.Logger
 	repo      repository.UserRepository
 	sentryHub *sentry.Hub
 }
 
-func NewUserService(repo repository.UserRepository, sentryHub *sentry.Hub) *UserService {
+func NewUserService(logger *slog.Logger, repo repository.UserRepository, sentryHub *sentry.Hub) *UserService {
 	return &UserService{
+		logger:    logger,
 		repo:      repo,
 		sentryHub: sentryHub,
 	}

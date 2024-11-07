@@ -11,12 +11,12 @@ import (
 )
 
 type RootHandler struct {
-	Logger *slog.Logger
+	logger *slog.Logger
 }
 
 func NewRootHandler(logger *slog.Logger) *RootHandler {
 	return &RootHandler{
-		Logger: logger,
+		logger: logger,
 	}
 }
 

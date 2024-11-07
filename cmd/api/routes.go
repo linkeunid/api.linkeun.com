@@ -22,17 +22,23 @@ func (app *App) setupRoutes(r chi.Router) {
 
 	r.Route("/v1", func(v1 chi.Router) {
 		v1.Route("/auth", func(authRouter chi.Router) {
-			authService := service.NewAuthService(userRepo, hub, app.bcrypt)
-			authHandler := handlers.NewAuthHandler(authService, app.logger)
+			authService := service.NewAuthService(app.logger, userRepo, hub, app.bcrypt)
+			authHandler := handlers.NewAuthHandler(app.logger, authService)
 			authHandler.RegisterRoutesV1(authRouter)
 		})
 
 		v1.Route("/users", func(userRouter chi.Router) {
 			userRouter.Use(middlewares.AuthMiddleware)
 
-			userService := service.NewUserService(userRepo, hub)            // Initialize the user service
-			userHandler := handlers.NewUserHandler(userService, app.logger) // Initialize the handler
-			userHandler.RegisterRoutesV1(userRouter)                        // Register the user routes
+			userService := service.NewUserService(app.logger, userRepo, hub) // Initialize the user service
+			userHandler := handlers.NewUserHandler(app.logger, userService)  // Initialize the handler
+			userHandler.RegisterRoutesV1(userRouter)                         // Register the user routes
+		})
+
+		v1.Route("/tools", func(toolsRouter chi.Router) {
+			toolService := service.NewToolService(app.logger)
+			toolHandler := handlers.NewToolHandler(app.logger, toolService)
+			toolHandler.RegisterRoutes(toolsRouter)
 		})
 	})
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"time"
 
 	"github.com/getsentry/sentry-go"
@@ -14,13 +15,15 @@ import (
 )
 
 type AuthService struct {
+	logger    *slog.Logger
 	repo      repository.UserRepository
 	sentryHub *sentry.Hub
 	hash      *bcrypt.Bcrypt
 }
 
-func NewAuthService(repo repository.UserRepository, sentryHub *sentry.Hub, hash *bcrypt.Bcrypt) *AuthService {
+func NewAuthService(logger *slog.Logger, repo repository.UserRepository, sentryHub *sentry.Hub, hash *bcrypt.Bcrypt) *AuthService {
 	return &AuthService{
+		logger:    logger,
 		repo:      repo,
 		sentryHub: sentryHub,
 		hash:      hash,

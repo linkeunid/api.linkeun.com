@@ -14,16 +14,16 @@ import (
 )
 
 type UserHandler struct {
+	logger    *slog.Logger
 	service   *service.UserService
 	validator *validator.Validate
-	Logger    *slog.Logger
 }
 
-func NewUserHandler(service *service.UserService, logger *slog.Logger) *UserHandler {
+func NewUserHandler(logger *slog.Logger, service *service.UserService) *UserHandler {
 	return &UserHandler{
+		logger:    logger,
 		service:   service,
 		validator: validator.New(),
-		Logger:    logger,
 	}
 }
 
