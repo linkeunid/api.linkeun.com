@@ -7,6 +7,7 @@ import (
 	"github.com/getsentry/sentry-go"
 	"github.com/linkeunid/api.linkeun.com/internal/models"
 	"github.com/linkeunid/api.linkeun.com/internal/repository"
+	"github.com/linkeunid/api.linkeun.com/pkg/utils"
 )
 
 type UserService struct {
@@ -37,8 +38,8 @@ func (s UserService) CreateUser(ctx context.Context, user *models.CreateUserRequ
 	return nil
 }
 
-func (s UserService) GetAll(ctx context.Context, limit, offset int) (*repository.UserListData, error) {
-	users, err := s.repo.GetAll(ctx, limit, offset)
+func (s UserService) GetAll(ctx context.Context, opts *utils.OrderingFilter) (*repository.UserListData, error) {
+	users, err := s.repo.GetAll(ctx, opts)
 	if err != nil {
 		s.sentryHub.CaptureException(err)
 		return nil, err

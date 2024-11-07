@@ -82,6 +82,8 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetAllUser(w http.ResponseWriter, r *http.Request) {
 	limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 	offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+	orderBy := r.URL.Query().Get("orderBy")
+	order := r.URL.Query().Get("order")
 
 	if limit <= 0 {
 		limit = 10
@@ -90,8 +92,15 @@ func (h *UserHandler) GetAllUser(w http.ResponseWriter, r *http.Request) {
 		offset = 0
 	}
 
+	filterOpts := &utils.OrderingFilter{
+		Limit:   limit,
+		Offset:  offset,
+		OrderBy: orderBy,
+		Order:   order,
+	}
+
 	ctx := r.Context()
-	data, err := h.service.GetAll(ctx, limit, offset)
+	data, err := h.service.GetAll(ctx, filterOpts)
 	if err != nil {
 		utils.WriteJSONResponse(w, &utils.ResponseOpts{
 			Code:    http.StatusInternalServerError,

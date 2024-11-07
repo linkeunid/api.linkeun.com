@@ -3,19 +3,22 @@ package repository
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 	"log/slog"
 	"os"
+	"strings"
 
 	"github.com/linkeunid/api.linkeun.com/internal/database"
 	"github.com/linkeunid/api.linkeun.com/internal/models"
 	"github.com/linkeunid/api.linkeun.com/pkg/bcrypt"
+	"github.com/linkeunid/api.linkeun.com/pkg/utils"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
 	Create(ctx context.Context, user *models.User) error
-	GetAll(ctx context.Context, limit, offset int) (*UserListData, error)
+	GetAll(ctx context.Context, opts *utils.OrderingFilter) (*UserListData, error)
 	GetByID(ctx context.Context, id uint64) (*models.User, error)
 	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	Update(ctx context.Context, updatedUser *models.User) error
@@ -67,9 +70,23 @@ func (repo *UserRepositoryImpl) Create(ctx context.Context, user *models.User) e
 	return err
 }
 
-func (repo *UserRepositoryImpl) GetAll(ctx context.Context, limit, offset int) (*UserListData, error) {
+func (repo *UserRepositoryImpl) GetAll(ctx context.Context, opts *utils.OrderingFilter) (*UserListData, error) {
 	var users []models.User
-	if err := repo.db.WithContext(ctx).Limit(limit).Offset(offset).Find(&users).Error; err != nil {
+
+	opts.OrderBy = strings.TrimSpace(strings.ToLower(opts.OrderBy))
+	opts.Order = strings.TrimSpace(strings.ToLower(opts.Order))
+
+	if opts.OrderBy == "" {
+		opts.OrderBy = "id"
+	}
+
+	if opts.Order == "" {
+		opts.Order = "desc"
+	}
+
+	ordering := fmt.Sprintf("%s %s", opts.OrderBy, opts.Order)
+
+	if err := repo.db.WithContext(ctx).Order(ordering).Limit(opts.Limit).Offset(opts.Offset).Find(&users).Error; err != nil {
 		repo.logger.Error("failed to get users", "error", err)
 		return nil, err
 	}
@@ -79,8 +96,8 @@ func (repo *UserRepositoryImpl) GetAll(ctx context.Context, limit, offset int) (
 		return nil, err
 	}
 
-	totalPages := int((totalCount + int64(limit) - 1) / int64(limit))
-	currentPage := offset/limit + 1
+	totalPages := int((totalCount + int64(opts.Limit) - 1) / int64(opts.Limit))
+	currentPage := opts.Offset/opts.Limit + 1
 	hasNext := currentPage < totalPages
 	hasPrev := currentPage > 1
 
