@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  api.linkeun.com:
+    build:
+      context: .
+      dockerfile: ./docker/api.linkeun.com.Dockerfile
+    image: linkeunid/api.linkeun.com:latest
+    container_name: api.linkeun.com
+    environment:
+      - HOST=${HOST}
+      - PORT=${PORT}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES=${JWT_EXPIRES}
+      - DSN=${DSN}
+      - SENTRY_DSN=${SENTRY_DSN}
+    ports:
+      - "4444:4444"
