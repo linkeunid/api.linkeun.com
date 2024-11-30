@@ -6,15 +6,19 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+
+	"github.com/getsentry/sentry-go"
 )
 
 type ToolService struct {
-	logger *slog.Logger
+	logger    *slog.Logger
+	sentryHub *sentry.Hub
 }
 
-func NewToolService(logger *slog.Logger) *ToolService {
+func NewToolService(logger *slog.Logger, sentryHub *sentry.Hub) *ToolService {
 	return &ToolService{
-		logger: logger,
+		logger:    logger,
+		sentryHub: sentryHub,
 	}
 }
 
@@ -27,11 +31,13 @@ func (s ToolService) GetIPInfo(ctx context.Context, clientIP string) (*map[strin
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
+		s.sentryHub.CaptureException(err)
 		return nil, err
 	}
 
 	var ipInfo map[string]interface{}
 	if err := json.Unmarshal(body, &ipInfo); err != nil {
+		s.sentryHub.CaptureException(err)
 		return nil, err
 	}
 
