@@ -8,7 +8,6 @@ import (
 	"runtime/debug"
 	"sync"
 
-	"github.com/linkeunid/api.linkeun.com/internal/database"
 	"github.com/linkeunid/api.linkeun.com/internal/version"
 	"github.com/linkeunid/api.linkeun.com/pkg/bcrypt"
 	"github.com/linkeunid/api.linkeun.com/pkg/config"
@@ -29,7 +28,7 @@ func main() {
 
 type App struct {
 	config *config.Config
-	db     *database.DB
+	// db     *database.DB
 	logger *slog.Logger
 	bcrypt *bcrypt.Bcrypt
 	wg     sync.WaitGroup
@@ -50,18 +49,18 @@ func bootstrap(logger *slog.Logger) error {
 		return err
 	}
 
-	db, err := database.NewDB(cfg.Dsn)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		sqlDB, err := db.DB.DB()
-		if err != nil {
-			logger.Error("failed to get sql.DB", "error", err)
-		} else {
-			sqlDB.Close()
-		}
-	}()
+	// db, err := database.NewDB(cfg.Dsn)
+	// if err != nil {
+	// 	return err
+	// }
+	// defer func() {
+	// 	sqlDB, err := db.DB.DB()
+	// 	if err != nil {
+	// 		logger.Error("failed to get sql.DB", "error", err)
+	// 	} else {
+	// 		sqlDB.Close()
+	// 	}
+	// }()
 
 	err = sentry.InitSentry(cfg.SentryDsn)
 	if err != nil {
@@ -72,7 +71,7 @@ func bootstrap(logger *slog.Logger) error {
 
 	app := &App{
 		logger: logger,
-		db:     db,
+		// db:     db,
 		config: cfg,
 		bcrypt: bcrypt,
 	}
