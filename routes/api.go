@@ -1,13 +1,31 @@
 package routes
 
 import (
+	"github.com/goravel/framework/contracts/route"
 	"github.com/goravel/framework/facades"
 
 	"github.com/linkeunid/api.linkeun.com/app/http/controllers"
+	"github.com/linkeunid/api.linkeun.com/app/http/middleware"
 )
 
 func Api() {
-	userController := controllers.NewUserController()
-	facades.Route().Get("/users", userController.Index)
-	facades.Route().Get("/users/{id}", userController.Show)
+	facades.Route().Prefix("api").Group(func(router route.Router) {
+		userController := controllers.NewUserController()
+		router.Prefix("users").Middleware(middleware.Jwt()).Group(func(router route.Router) {
+			router.Get("/", userController.Index)
+			router.Get("/{id}", userController.Show)
+			router.Post("/", userController.Store)
+			router.Patch("/{id}", userController.Update)
+			router.Delete("/{id}", userController.Destroy)
+			router.Get("/profile", userController.Profile)
+		})
+
+		authController := controllers.NewAuhController()
+		router.Prefix("auth").Group(func(router route.Router) {
+			router.Post("/login", authController.Login)
+			router.Post("/register", authController.Register)
+			router.Post("/logout", authController.Logout)
+			router.Get("/verify/{token}", authController.Verify)
+		})
+	})
 }

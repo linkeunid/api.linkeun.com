@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"github.com/goravel/framework/facades"
 )
 
@@ -30,6 +32,7 @@ func init() {
 		"guards": map[string]any{
 			"user": map[string]any{
 				"driver": "jwt",
+				"ttl":    24 * time.Hour,
 			},
 		},
 	})
