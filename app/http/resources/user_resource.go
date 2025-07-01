@@ -21,6 +21,7 @@ func MakeUserCollection(users []*models.User) []map[string]interface{} {
 func (r *UserResource) ToArray() map[string]interface{} {
 	return map[string]interface{}{
 		"id":         r.User.ID,
+		"username":   r.User.Username,
 		"name":       r.User.Name,
 		"email":      r.User.Email,
 		"created_at": r.User.CreatedAt,

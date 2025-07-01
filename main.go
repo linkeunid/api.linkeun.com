@@ -5,6 +5,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/goravel/framework/contracts/queue"
 	"github.com/goravel/framework/facades"
 
 	"github.com/linkeunid/api.linkeun.com/bootstrap"
@@ -22,6 +23,15 @@ func main() {
 	go func() {
 		if err := facades.Route().Run(); err != nil {
 			facades.Log().Errorf("Route Run error: %v", err)
+		}
+	}()
+
+	// Start queue server by facades.Queue().
+	go func() {
+		if err := facades.Queue().Worker(queue.Args{
+			Queue: "mails",
+		}).Run(); err != nil {
+			facades.Log().Errorf("Queue run error: %v", err)
 		}
 	}()
 

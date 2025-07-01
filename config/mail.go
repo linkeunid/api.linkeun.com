@@ -29,6 +29,10 @@ func init() {
 		"from": map[string]any{
 			"address": config.Env("MAIL_FROM_ADDRESS", "hello@example.com"),
 			"name":    config.Env("MAIL_FROM_NAME", "Example"),
+			"support": map[string]any{
+				"address": config.Env("MAIL_SUPPORT_ADDRESS", "support@example.com"),
+				"name":    config.Env("MAIL_SUPPORT_NAME", "Support"),
+			},
 		},
 
 		// SMTP Server Username

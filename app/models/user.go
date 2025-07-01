@@ -8,9 +8,11 @@ import (
 
 type User struct {
 	orm.Model
-	Name     string
-	Email    string
-	Password string
+	Name       string
+	Username   string
+	Email      string
+	Password   string
+	IsVerified bool `gorm:"column:is_verified;default:false"`
 	orm.SoftDeletes
 }
 

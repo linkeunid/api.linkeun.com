@@ -30,6 +30,8 @@ func init() {
 		},
 		// HTTP URL
 		"url": config.Env("APP_URL", "http://localhost"),
+		// Frontend URL
+		"frontend_url": config.Env("APP_FRONTEND_URL", "http://localhost:5173"),
 		// HTTP Host
 		"host": config.Env("APP_HOST", "127.0.0.1"),
 		// HTTP Port
