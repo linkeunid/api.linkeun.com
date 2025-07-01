@@ -19,14 +19,16 @@ func (s *UserSeeder) Signature() string {
 func (s *UserSeeder) Run() error {
 	randPass := faker.Word()
 	facades.Log().Debug("Your password is: ", randPass)
-	secret, err := facades.Crypt().EncryptString(randPass)
+	secret, err := facades.Hash().Make(randPass)
 	if err != nil {
 		return err
 	}
 	user := models.User{
-		Name:     "Hanivan Rizky S",
-		Email:    "hanivan@linkeun.com",
-		Password: secret,
+		Name:       "Hanivan Rizky S",
+		Username:   "hanivanrizky",
+		Email:      "hanivan@linkeun.com",
+		IsVerified: true,
+		Password:   secret,
 	}
 
 	return facades.Orm().Query().Create(&user)

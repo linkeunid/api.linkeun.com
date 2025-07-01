@@ -17,11 +17,18 @@ func (r *M20240915060148CreateUsersTable) Signature() string {
 func (r *M20240915060148CreateUsersTable) Up() error {
 	return facades.Schema().Create("users", func(table schema.Blueprint) {
 		table.ID("id")
+
 		table.String("name")
+		table.String("username")
 		table.String("email")
 		table.String("password")
+		table.Boolean("is_verified").Default(false)
+
 		table.TimestampsTz()
 		table.SoftDeletesTz()
+
+		table.Unique("username")
+		table.Unique("email")
 	})
 }
 
