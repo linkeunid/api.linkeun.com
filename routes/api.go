@@ -11,7 +11,7 @@ import (
 func Api() {
 	facades.Route().Prefix("api").Group(func(router route.Router) {
 		userController := controllers.NewUserController()
-		router.Prefix("users").Middleware(middleware.Jwt()).Group(func(router route.Router) {
+		router.Prefix("users").Middleware(middleware.Jwt(nil)).Group(func(router route.Router) {
 			router.Get("/", userController.Index)
 			router.Get("/{id}", userController.Show)
 			router.Post("/", userController.Store)
@@ -27,5 +27,19 @@ func Api() {
 			router.Post("/logout", authController.Logout)
 			router.Get("/verify/{token}", authController.Verify)
 		})
+
+		shortUrlController := controllers.NewShortUrlController()
+		shortUrlControllerExceptPaths := middleware.ExceptPaths{
+			"/api/s/": []string{"POST"},
+		}
+		router.Get("/s/{shortCode}", shortUrlController.Redirect)
+		router.Prefix("s").Middleware(middleware.Jwt(&shortUrlControllerExceptPaths)).Group(func(router route.Router) {
+			router.Post("/", shortUrlController.Store)
+			router.Get("/", shortUrlController.Index)
+			router.Get("/{shortCode}/detail", shortUrlController.Show)
+			router.Put("/{shortCode}", shortUrlController.Update)
+			router.Delete("/{shortCode}", shortUrlController.Destroy)
+		})
+
 	})
 }

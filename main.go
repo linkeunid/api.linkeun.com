@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -10,6 +11,16 @@ import (
 
 	"github.com/linkeunid/api.linkeun.com/bootstrap"
 )
+
+func testRedisConnection() error {
+	appName := facades.Config().GetString("app.name")
+	hasAccess := facades.Cache().Has(appName)
+	if !hasAccess {
+		return errors.New("redis connection failed")
+	}
+
+	return nil
+}
 
 func main() {
 	// This bootstraps the framework and gets it ready for use.
@@ -26,14 +37,18 @@ func main() {
 		}
 	}()
 
-	// Start queue server by facades.Queue().
-	go func() {
-		if err := facades.Queue().Worker(queue.Args{
-			Queue: "mails",
-		}).Run(); err != nil {
-			facades.Log().Errorf("Queue run error: %v", err)
-		}
-	}()
+	if err := testRedisConnection(); err == nil {
+		facades.Log().Infof("Redis connection success")
+
+		// Start queue server by facades.Queue().
+		go func() {
+			if err := facades.Queue().Worker(queue.Args{
+				Queue: "mails",
+			}).Run(); err != nil {
+				facades.Log().Errorf("Queue run error: %v", err)
+			}
+		}()
+	}
 
 	// Listen for the OS signal
 	go func() {

@@ -6,7 +6,7 @@ import (
 
 type Url struct {
 	orm.Model
-	UserId       uint64
+	UserId       *uint64
 	ShortCode    string  `gorm:"column:short_code"`
 	OriginalUrl  string  `gorm:"column:original_url"`
 	IsActive     bool    `gorm:"column:is_active"`

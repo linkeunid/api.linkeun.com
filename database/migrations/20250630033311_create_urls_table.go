@@ -19,7 +19,7 @@ func (r *M20250630033311CreateUrlsTable) Up() error {
 		return facades.Schema().Create("urls", func(table schema.Blueprint) {
 			table.ID()
 
-			table.UnsignedBigInteger("user_id")
+			table.UnsignedBigInteger("user_id").Nullable()
 			table.Char("short_code")
 			table.Text("original_url")
 			table.Boolean("is_active").Default(true)

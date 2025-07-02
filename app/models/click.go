@@ -13,7 +13,6 @@ type Click struct {
 	IpAddress *string   `gorm:"column:ip_address"`
 	UserAgent *string   `gorm:"column:user_agent"`
 	Referrer  *string
-	Browser   *string
 	Url       Url `gorm:"foreignKey:UrlID"`
 	orm.SoftDeletes
 }

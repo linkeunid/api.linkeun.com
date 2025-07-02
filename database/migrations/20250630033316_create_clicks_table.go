@@ -24,7 +24,6 @@ func (r *M20250630033316CreateClicksTable) Up() error {
 			table.Char("ip_address").Nullable()
 			table.Text("user_agent").Nullable()
 			table.Text("referrer").Nullable()
-			table.Char("browser").Nullable()
 
 			table.TimestampsTz()
 			table.SoftDeletesTz()
