@@ -37,7 +37,7 @@ func Api() {
 			router.Post("/", shortUrlController.Store)
 			router.Get("/", shortUrlController.Index)
 			router.Get("/{shortCode}/detail", shortUrlController.Show)
-			router.Put("/{shortCode}", shortUrlController.Update)
+			router.Patch("/{shortCode}", shortUrlController.Update)
 			router.Delete("/{shortCode}", shortUrlController.Destroy)
 		})
 

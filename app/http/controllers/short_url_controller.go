@@ -26,17 +26,44 @@ func (r *ShortUrlController) Index(ctx http.Context) http.Response {
 		return helpers.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil, err)
 	}
 
-	urls, err := r.shortUrlService.GetUrlsByUserId(uint64(user.ID))
+	paginateInput := helpers.ParsePaginationRequest(ctx)
+
+	urls, total, err := r.shortUrlService.GetUrlsByUserId(
+		uint64(user.ID),
+		paginateInput.Page,
+		paginateInput.PerPage,
+		paginateInput.Sort,
+		paginateInput.Search,
+		paginateInput.Filters,
+	)
 	if err != nil {
 		return helpers.JsonResponse(ctx, http.StatusInternalServerError, "error", nil, err)
 	}
 
 	data := resources.MakeUrlCollection(urls)
-	return helpers.JsonResponse(ctx, http.StatusOK, "success", data, nil)
+	meta := helpers.MakePaginationMeta(total, paginateInput.Page, paginateInput.PerPage)
+
+	return helpers.JsonPaginateResponse(ctx, http.StatusOK, "success", data, meta, nil)
 }
 
 func (r *ShortUrlController) Show(ctx http.Context) http.Response {
-	return nil
+	var user models.User
+	if err := facades.Auth(ctx).User(&user); err != nil {
+		return helpers.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil, err)
+	}
+
+	shortCode := ctx.Request().Route("shortCode")
+	if shortCode == "" {
+		return helpers.JsonResponse(ctx, http.StatusBadRequest, "shortCode parameter is required", nil, nil)
+	}
+
+	url, err := r.shortUrlService.GetUrlByShortCodeAndUserId(shortCode, uint64(user.ID))
+	if err != nil {
+		return helpers.JsonResponse(ctx, http.StatusNotFound, "URL not found", nil, nil)
+	}
+
+	data := resources.MakeUrlResource(url).ToArray()
+	return helpers.JsonResponse(ctx, http.StatusOK, "success", data, nil)
 }
 
 func (r *ShortUrlController) Store(ctx http.Context) http.Response {
@@ -70,11 +97,55 @@ func (r *ShortUrlController) Store(ctx http.Context) http.Response {
 }
 
 func (r *ShortUrlController) Update(ctx http.Context) http.Response {
-	return nil
+	var user models.User
+	if err := facades.Auth(ctx).User(&user); err != nil {
+		return helpers.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil, err)
+	}
+
+	shortCode := ctx.Request().Route("shortCode")
+	if shortCode == "" {
+		return helpers.JsonResponse(ctx, http.StatusBadRequest, "shortCode parameter is required", nil, nil)
+	}
+
+	var request requests.UpdateShortUrlRequest
+	errors, _ := ctx.Request().ValidateRequest(&request)
+	if errors != nil {
+		return helpers.JsonResponse(ctx, http.StatusUnprocessableEntity, "validation error", nil, errors.All())
+	}
+
+	url, err := r.shortUrlService.UpdateUrlByShortCodeAndUserId(
+		shortCode,
+		uint64(user.ID),
+		request.OriginalUrl,
+		request.CustomAlias,
+		request.Password,
+		request.Description,
+	)
+	if err != nil {
+		return helpers.JsonResponse(ctx, http.StatusNotFound, "URL not found", nil, nil)
+	}
+
+	data := resources.MakeUrlResource(url).ToArray()
+	return helpers.JsonResponse(ctx, http.StatusOK, "URL updated successfully", data, nil)
 }
 
 func (r *ShortUrlController) Destroy(ctx http.Context) http.Response {
-	return nil
+	var user models.User
+	if err := facades.Auth(ctx).User(&user); err != nil {
+		return helpers.JsonResponse(ctx, http.StatusUnauthorized, "unauthorized", nil, err)
+	}
+
+	shortCode := ctx.Request().Route("shortCode")
+	if shortCode == "" {
+		return helpers.JsonResponse(ctx, http.StatusBadRequest, "shortCode parameter is required", nil, nil)
+	}
+
+	err := r.shortUrlService.DeleteUrlByShortCodeAndUserId(shortCode, uint64(user.ID))
+	if err != nil {
+		return helpers.JsonResponse(ctx, http.StatusNotFound, "URL not found", nil, nil)
+	}
+
+	return helpers.JsonResponse(ctx, http.StatusOK, "URL deleted successfully", nil, nil)
 }
 
 func (r *ShortUrlController) Redirect(ctx http.Context) http.Response {

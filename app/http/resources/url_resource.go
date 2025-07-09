@@ -1,6 +1,8 @@
 package resources
 
-import "github.com/linkeunid/api.linkeun.com/app/models"
+import (
+	"github.com/linkeunid/api.linkeun.com/app/models"
+)
 
 type UrlResource struct {
 	Url *models.Url
@@ -25,6 +27,7 @@ func (r *UrlResource) ToArray() map[string]interface{} {
 		"short_code":   r.Url.ShortCode,
 		"original_url": r.Url.OriginalUrl,
 		"is_active":    r.Url.IsActive,
+		"is_private":   r.Url.PasswordHash != nil && *r.Url.PasswordHash != "",
 		"custom_alias": r.Url.CustomAlias,
 		"description":  r.Url.Description,
 		"clicks_count": r.Url.ClicksCount,
